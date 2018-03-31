@@ -2,7 +2,7 @@ lazy val metadataSettings = Seq(
   name := "SBT Release Audit Tool",
   organization := "org.musigma",
   moduleName := "sbt-rat",
-  version := "0.1-SNAPSHOT",
+  version := "0.1",
   licenses := Seq("Apache License, Version 2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   developers := List(
     Developer("jvz", "Matt Sicker", "mattsicker@apache.org", url("https://musigma.blog/"))
