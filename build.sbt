@@ -20,7 +20,7 @@ lazy val buildSettings = Seq(
 
 //lazy val releaseSettings = Seq(
 //  pgpSecretRing := file(".travis-secring.gpg"),
-//  usePgpKeyHex("E102 55CA ADF8 274A 7146"),
+//  usePgpKeyHex("BCC60587F2C9062CE016"),
 //  releaseEarlyWith := SonatypePublisher
 //)
 
