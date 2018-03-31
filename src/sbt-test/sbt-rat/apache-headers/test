@@ -1,0 +1,6 @@
+# given source files with apache license headers
+# when we audit check
+# then it should succeed
+> auditCheck
+# and it should generate a rat report
+$ exists target/rat.txt
