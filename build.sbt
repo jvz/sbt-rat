@@ -18,13 +18,17 @@ lazy val buildSettings = Seq(
   initialCommands in console := "import org.musigma.sbt.rat._"
 )
 
-//lazy val releaseSettings = Seq(
-//  pgpSecretRing := file(".travis-secring.gpg"),
-//  usePgpKeyHex("BCC60587F2C9062CE016"),
-//  releaseEarlyWith := SonatypePublisher
-//)
+lazy val releaseSettings = Seq(
+  pgpSecretRing := {
+    val old = pgpSecretRing.value
+    val travis = file(".travis-secring.gpg")
+    if (travis.exists()) travis else old
+  },
+  usePgpKeyHex("BCC60587F2C9062CE016"),
+  releaseEarlyWith := SonatypePublisher
+)
 
 lazy val root = (project in file("."))
   .settings(metadataSettings: _*)
   .settings(buildSettings: _*)
-//  .settings(releaseSettings: _*)
+  .settings(releaseSettings: _*)
