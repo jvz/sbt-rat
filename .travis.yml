@@ -1,29 +1,46 @@
 language: scala
 
 jdk:
-  - oraclejdk8
+- oraclejdk8
 
 scala:
-  - '2.12.4'
+- 2.12.4
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 scripted
+- sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 scripted
 
 sudo: false
 
-# https://docs.travis-ci.com/user/languages/java/
 addons:
   apt:
     packages:
-      - oracle-java8-installer
+    - oracle-java8-installer
 
 before_cache:
-  # Tricks to avoid unnecessary cache updates
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+- find $HOME/.sbt -name "*.lock" | xargs rm
+- find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 
-# These directories are cached to S3 at the end of the build
 cache:
   directories:
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot/
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/boot/"
+
+# TODO: switch over to Maven Central
+deploy:
+  provider: releases
+  api_key:
+    secure: Mh058JTdq5rXfUJO5g+n1S7o/d6uSfuo+M7Xwu4iLh5opZYtC1asVZvJ4mlj2al5joKC02/mu8ib63KzCgZ29vjq6jFh2sWop0EJb/cw3uPmN51VdGc7b/fBtUTrBETqgP298hR0kP1ZjgWI8Uyqotxq4uh9tITFH8As8Eytrw112nKdk+H4U4K+65EaeX8VOtk2h0wgbiF2CLTInjI9TUQs9YWAYX48/1IJLDznYSDqNV21ushYhx5TfNynx3UrHGaTer7fxywX8uIezJLEBlC8MY0kt31dLhf69oe1LcpMbmcTrKFCYboXdAX8bf+lZZkYxQxqwNye2kg+yc6HcGeSyXprSZ4QZkD3cRQFQWicMnUef5szRRJJ+mf0hQMB57eA5KMADYHCTJguxTQef2Sn982jodIbpQjnYkf6Du5rp2aWMN2enWofTcFEmH4RBdOv681dgrhLolO2KJNRAhWbI89iRrE5hZmDtd29L3zR6OpLr8d4jTz9w346hdZiBnqLMguhqaVZYDz+0BQg4GWzebiYKtCDnyiJwRc57L4/YY1dwoOqKMS+QVFYztjxJ6C52ucGan1fIXsBwv7cA06lMEeoZMHu8psYHHRV7m3Qp4M4Fx4C7A/OeuJFJ/JDtFVJqOzcwxz2Ip78kLDMAtYbhNA8k1AfvmV8U/56UIw=
+  file_glob: true
+  file: target/**/*.jar
+  skip_cleanup: true
+  on:
+    repo: jvz/sbt-rat
+    tags: true
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_ac7eeb13566f_key -iv $encrypted_ac7eeb13566f_iv
+  -in .travis-secring.asc.enc -out .travis-secring.asc -d
+
+#after_success:
+#- if [ $TRAVIS_PULL_REQUEST = 'false' ]; then sbt ++$TRAVIS_SCALA_VERSION releaseEarly;
+#  fi
