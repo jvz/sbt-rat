@@ -1,8 +1,9 @@
+import xerial.sbt.Sonatype.GitHubHosting
+
 lazy val metadataSettings = Seq(
   name := "SBT Release Audit Tool",
   organization := "org.musigma",
   moduleName := "sbt-rat",
-  version := "0.2",
   licenses := Seq("Apache License, Version 2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   developers := List(
     Developer("jvz", "Matt Sicker", "mattsicker@apache.org", url("https://musigma.blog/"))
@@ -19,17 +20,31 @@ lazy val buildSettings = Seq(
   initialCommands in console := "import org.musigma.sbt.rat._"
 )
 
-lazy val releaseSettings = Seq(
+lazy val signatureSettings = Seq(
   pgpSecretRing := {
     val old = pgpSecretRing.value
     val travis = file(".travis-secring.gpg")
     if (travis.exists()) travis else old
   },
   usePgpKeyHex("BCC60587F2C9062CE016"),
-  releaseEarlyWith := SonatypePublisher
+  pgpPassphrase := sys.env.get("PGP_PASS").map(_.toCharArray)
+)
+
+lazy val releaseSettings = Seq(
+  credentials ++= {
+    for {
+      user <- sys.env.get("SONATYPE_USER")
+      pass <- sys.env.get("SONATYPE_PASS")
+    } yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", user, pass)
+  }.toList,
+  publishMavenStyle := true,
+  publishTo := sonatypePublishTo.value,
+  sonatypeProfileName := "musigma",
+  sonatypeProjectHosting := Some(GitHubHosting("jvz", "sbt-rat", "Matt Sicker", "mattsicker@apache.org"))
 )
 
 lazy val root = (project in file("."))
   .settings(metadataSettings: _*)
   .settings(buildSettings: _*)
+  .settings(signatureSettings: _*)
   .settings(releaseSettings: _*)
