@@ -30,5 +30,5 @@ before_install:
   fi
 after_success:
 - if [ $TRAVIS_PULL_REQUEST = 'false' -a x$TRAVIS_TAG != x ]; then
-    sbt -Dfile.encoding=UTF8 ";^^$SBT_CROSS_VERSION; releaseEarly;";
+    sbt -Dfile.encoding=UTF8 ";^^$SBT_CROSS_VERSION; releaseEarly";
   fi
