@@ -29,6 +29,6 @@ before_install:
     openssl aes-256-cbc -K $encrypted_ac7eeb13566f_key -iv $encrypted_ac7eeb13566f_iv -in .travis-secring.gpg.enc -out .travis-secring.gpg -d;
   fi
 after_success:
-- if [ $TRAVIS_PULL_REQUEST = 'false' -a x$TRAVIS_BRANCH = x$TRAVIS_TAG ]; then
+- if [ $TRAVIS_PULL_REQUEST = 'false' -a x$TRAVIS_TAG != x ]; then
     sbt -Dfile.encoding=UTF8 ";^^$SBT_CROSS_VERSION; releaseEarly;";
   fi
