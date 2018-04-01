@@ -1,0 +1,18 @@
+= sbt release audit tool
+
+Release audit tool for sbt. See link:ChangeLog.adoc[changelog].
+
+== Usage
+
+This plugin is built for sbt 0.13.17+ and 1.1.2+, though it may work with sbt 0.13.5+.
+To add this to your project, add the following to your build:
+
+.project/plugins.sbt
+[source,scala]
+----
+addSbtPlugin("org.musigma" % "sbt-rat" % "0.2")
+----
+
+=== Testing
+
+Run `scripted` for http://www.scala-sbt.org/1.x/docs/Testing-sbt-plugins.html[sbt script tests].
