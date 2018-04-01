@@ -2,11 +2,11 @@
 
 Release audit tool for sbt. See link:ChangeLog.adoc[changelog].
 
-image:https://travis-ci.org/jvz/sbt-rat.svg?branch=master["Build Status", link="https://travis-ci.org/jvz/sbt-rat"]
+image:https://circleci.com/gh/jvz/sbt-rat.svg?style=svg["CircleCI", link="https://circleci.com/gh/jvz/sbt-rat"]
 
 == Usage
 
-This plugin is built for sbt 0.13.17+ and 1.1.2+, though it may work with sbt 0.13.5+.
+This plugin is built for sbt 0.13.x and 1.x, and it is available as an auto plugin.
 To add this to your project, add the following to your build:
 
 .project/plugins.sbt
@@ -17,4 +17,4 @@ addSbtPlugin("org.musigma" % "sbt-rat" % "0.2")
 
 === Testing
 
-Run `sbt scripted` for http://www.scala-sbt.org/1.x/docs/Testing-sbt-plugins.html[sbt script tests].
+Run `sbt "^ scripted"` for http://www.scala-sbt.org/1.x/docs/Testing-sbt-plugins.html[sbt script tests].
