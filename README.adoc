@@ -2,6 +2,8 @@
 
 Release audit tool for sbt. See link:ChangeLog.adoc[changelog].
 
+image:https://travis-ci.org/jvz/sbt-rat.svg?branch=master["Build Status", link="https://travis-ci.org/jvz/sbt-rat"]
+
 == Usage
 
 This plugin is built for sbt 0.13.17+ and 1.1.2+, though it may work with sbt 0.13.5+.
