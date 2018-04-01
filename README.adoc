@@ -17,4 +17,4 @@ addSbtPlugin("org.musigma" % "sbt-rat" % "0.2")
 
 === Testing
 
-Run `scripted` for http://www.scala-sbt.org/1.x/docs/Testing-sbt-plugins.html[sbt script tests].
+Run `sbt scripted` for http://www.scala-sbt.org/1.x/docs/Testing-sbt-plugins.html[sbt script tests].
