@@ -21,7 +21,7 @@ import org.apache.rat.analysis.IHeaderMatcher
 import org.apache.rat.analysis.util.HeaderMatcherMultiplexer
 import org.apache.rat.document.impl.FileDocument
 import org.apache.rat.license.ILicenseFamily
-import org.apache.rat.report.IReportable
+import org.apache.rat.report.{IReportable, RatReport}
 import org.apache.rat.report.claim.ClaimStatistic
 import org.apache.rat.{Report, ReportConfiguration, Defaults => RatDefaults}
 import sbt.Keys._
@@ -37,6 +37,7 @@ object SbtRatPlugin extends AutoPlugin {
   override def requires = JvmPlugin
 
   object autoImport {
+    // FIXME: this should probably be a task, not a configuration (e.g., packageBin)
     val Audit = config("audit")
 
     val auditCheck = taskKey[Unit]("Performs a release audit check")
@@ -57,6 +58,7 @@ object SbtRatPlugin extends AutoPlugin {
 
   override def projectConfigurations: Seq[Configuration] = Seq(Audit)
 
+  // TODO: mappings in Audit?
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
     addDefaultLicenseMatchers := true,
     allowedLicenseFamilies := Nil,
@@ -73,10 +75,12 @@ object SbtRatPlugin extends AutoPlugin {
            headers: Seq[HeaderMatcher]): AuditReport = {
       if (!target.exists()) target.mkdirs()
       val writer = new FileWriter(target / "rat.txt")
-      val base: IReportable = report => {
-        report.startReport()
-        inputs.map(new FileDocument(_)).foreach(report.report)
-        report.endReport()
+      val base = new IReportable {
+        override def run(report: RatReport): Unit = {
+          report.startReport()
+          inputs.map(new FileDocument(_)).foreach(report.report)
+          report.endReport()
+        }
       }
       val mergedHeaders = if (addDefaults) RatDefaults.DEFAULT_MATCHERS.asScala ++ headers else headers
       val config = new ReportConfiguration

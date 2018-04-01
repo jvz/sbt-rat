@@ -2,7 +2,7 @@ lazy val metadataSettings = Seq(
   name := "SBT Release Audit Tool",
   organization := "org.musigma",
   moduleName := "sbt-rat",
-  version := "0.1",
+  version := "0.2",
   licenses := Seq("Apache License, Version 2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   developers := List(
     Developer("jvz", "Matt Sicker", "mattsicker@apache.org", url("https://musigma.blog/"))
@@ -13,6 +13,7 @@ lazy val metadataSettings = Seq(
 
 lazy val buildSettings = Seq(
   sbtPlugin := true,
+  crossSbtVersions := Seq("0.13.17", "1.1.2"),
   libraryDependencies += "org.apache.rat" % "apache-rat-core" % "0.12",
   scriptedLaunchOpts ++= Seq("-Xmx1024M", "-Dplugin.version=" + version.value),
   initialCommands in console := "import org.musigma.sbt.rat._"

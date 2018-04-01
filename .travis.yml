@@ -1,10 +1,12 @@
 language: scala
 jdk:
 - oraclejdk8
-scala:
-- 2.12.4
+matrix:
+  include:
+  - env: SBT_CROSS_VERSION="0.13.17"
+  - env: SBT_CROSS_VERSION="1.1.2"
 script:
-- sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 scripted
+- sbt -Dfile.encoding=UTF8 ";^^$SBT_CROSS_VERSION; update; compile; scripted"
 sudo: false
 addons:
   apt:
