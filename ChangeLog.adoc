@@ -1,0 +1,10 @@
+= sbt-rat changelog
+
+== Version 0.1
+
+New Features::
+* Add `auditReport` and `auditCheck` tasks.
+* Add allowed license setting keys.
+* Add default licenses in default settings.
+* Add Maven Central release.
+* Add Travis CI build.
