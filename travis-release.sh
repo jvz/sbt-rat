@@ -10,5 +10,6 @@ eval "$(ssh-agent -s)"
 ssh-add travis/deploy_key
 git config user.name "Matt Sicker"
 git config user.email "mattsicker@apache.org"
+git remote set-url origin git@github.com:jvz/sbt-rat.git
 git checkout ${TRAVIS_BRANCH}
 ./sbtx "release with-defaults"
