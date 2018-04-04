@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -e
+#!/bin/bash -e
 
 if [[ $# != 2 ]]; then exit 1; fi
 enc_key=$1
