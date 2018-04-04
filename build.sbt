@@ -1,4 +1,5 @@
 import xerial.sbt.Sonatype.GitHubHosting
+import ReleaseTransformations._
 
 lazy val metadataSettings = Seq(
   name := "SBT Release Audit Tool",
@@ -23,7 +24,7 @@ lazy val buildSettings = Seq(
 lazy val signatureSettings = Seq(
   pgpSecretRing := {
     val old = pgpSecretRing.value
-    val travis = file(".travis-secring.gpg")
+    val travis = file("travis/secring.gpg")
     if (travis.exists()) travis else old
   },
   usePgpKeyHex("BCC60587F2C9062CE016"),
@@ -39,8 +40,21 @@ lazy val releaseSettings = Seq(
   }.toList,
   publishMavenStyle := true,
   publishTo := sonatypePublishTo.value,
-  sonatypeProfileName := "musigma",
-  sonatypeProjectHosting := Some(GitHubHosting("jvz", "sbt-rat", "Matt Sicker", "mattsicker@apache.org"))
+  sonatypeProjectHosting := Some(GitHubHosting("jvz", "sbt-rat", "Matt Sicker", "mattsicker@apache.org")),
+  releaseProcess := Seq(
+    checkSnapshotDependencies,
+    inquireVersions,
+    runClean,
+    releaseStepCommandAndRemaining("^ scripted"),
+    setReleaseVersion,
+    commitReleaseVersion,
+    tagRelease,
+    releaseStepCommandAndRemaining("^ publishSigned"),
+    releaseStepCommand("sonatypeReleaseAll"),
+    setNextVersion,
+    commitNextVersion,
+    pushChanges
+  )
 )
 
 lazy val root = (project in file("."))

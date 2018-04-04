@@ -1,14 +1,11 @@
 language: scala
 jdk:
 - oraclejdk8
-matrix:
-  include:
-  - env: SBT_CROSS_VERSION="0.13.17"
-  - env: SBT_CROSS_VERSION="1.1.2"
 script:
-- sbt -Dfile.encoding=UTF8 ";^^$SBT_CROSS_VERSION; update; compile; scripted"
+- ./sbtx "^scripted"
 sudo: false
 addons:
+  ssh_known_hosts: github.com
   apt:
     packages:
     - oracle-java8-installer
@@ -19,16 +16,10 @@ cache:
   directories:
   - "$HOME/.ivy2/cache"
   - "$HOME/.sbt/boot/"
+  - "$HOME/.m2/repository/"
+after_success:
+- if [ $TRAVIS_PULL_REQUEST = 'false' ]; then ./travis-release.sh $encrypted_ac7eeb13566f_key
+  $encrypted_ac7eeb13566f_iv; fi
 env:
   global:
-  - secure: WHHoI6i3bPtDIe/U12CJ3DPqjB9MqtFH/uMEHMMJ7LDuGXWZhd7TzskmRjerTbF2kk1ZkqkorTP7s7A/g+KzuWf9U6oTmvdkAwgey3Ht7P5IhmY3jwJQDK+K73aIECKHF/L4MK2sCTeUjbwOEq6jcyWyqHDl1M4aFSRhoYS8M5Oy1HTL5b9HqT3zhWqguXDeTPICwZk0PU2LWDMaA0jCwgQ6bPe/zSMgnCjwZerfCDU+oiI+JZI3T5Kikqu09YtB33BHb6YahUwgFXIH+e/2OhCvQigsEyY8iSBhKRw6VurOqxafOVPitZZ1sl25cOCf+YHGyUXlCgLNM1cwr79dhluhf3QrOCZ0Ql1KeyBRih//6toldh69TYFo6KU6lrdJQJkyR/3C+VBz98qpC3N8/ECvp31UpC3pOcDKKFsaC02wG83H4hRuaP1Z31BXlCnY3u+5WdaFY2Y9XViJ1Q+zOHT1zJH/NHbR8uSIiEgNurJFgHjuFNpaY3bKwmTJuacShb6AD7KcU4nku8o10zlbyS+/DyWeDWCKDhP114B1oEJyZCcD4/yDBxD+cp/vvuChqM3YZ9xoWn/+DA9eJVJLgxuXXhIJPCozlzfIspOVhFnygOv9IzTr/CxgPHOKHGHXBtuH1OUliIakKA3E2cmfxeHyZNhU6YZ+ChnWeeVxoRY=
-  - secure: MI0p6PHVuH4YHGj3n+acsx6McTx+cTZZYrm5mM4aMztaT3LUOo61eWPbK+l5lQ8LIKunmf1GswIkXiyeTcLS4DBQrSZCkvl9oJ9q8tzjfESLvvPAYEkkO6pCSsERU/kV4+p+8Y25HR/NCR1E5YZifra427OemCZSoLt7IYapnQV0vqCjvDxzMC7k/emnnci+RtvvZx+oYX37C13bgvCWB2XAIaxBK3nYFgdcHHHKZXh/kKtefBmNs4ctvl9AN7DpRy03qqYerRij8Vtr/NjST7XNUbb40+8jM9DvnM9O/8N82i0URhnJKPyx4tRVEsQhNiVHVVhoH972jcPL63Qugio4QOuSxkpMhzvg2AaCD/JkqLGMDoMFyIDDp0zjLunFZPUN6VnDKRmcR/TYGwYB6eOe3YJB/XwNzJ2pmB47I5aa+J5hFleNMsLVXpMlO8tc7A7itN5D8POUC3bbycfwyGjlC4nbpY+S/Rcb1EykRUG66qX+829o/dGe3OWKEweu0mJ1HvzYy5/YZZmdiZbuFi4fyBKME2eE6nT6q6NWCD5Iog5a78tZsgjBX5xGigZjlm22xgdtcPZC1cc3frYAH08g3kD4SlfP2wEtmDc7Y/IyvSB7iPdcsFcMCi5fH02cdjS/XcMkXRP7JZAXxno+d8zMjCJgzqkKnFZna94MTYo=
-  - secure: bZqPI+ZDHJvfR24wGa1aweM6g24+8I/HIQEGATQCSEoezNz9LU7WYRPRcoY9Z2qn4Rw6rlwTABGlk8Kbz0GhiFGKRTCuFFImVOTzT1QnDFoYGDg8Q9kvg+++xwX4pAHGeKLjhTnPs8cUjfvDCG31cMcUDmEnBZRkWzVmVF5EodxSXz3s0cStN0ppYrTDnIeoEU19Jyd58OVOtxtDAgfhq2Dkk9bzy92SySLhSVnRywc5F2ar2VtPbveE22XIlHm6yenmsr513H1QuVBDL52V6nJvCBMq//pP3oNlR8H6k8PPAzZsSSIZ3j6ondiOgEiomDeyumuwDF3lqu033Hmi69xkCyvpReJbPxOvE1KbPVvtsIvWudYu8FE5VtR3Fr0sezxEjEyhiu6M/yTl20rQvIS/EzRS88t+PRUypsXS7fT2aJ6kfYVsGzyBF2EuF/p0Fwtrwb52BXYC3ZPve4gbpYsScAL/uxHFFVpapzEcciTVdi3qFaZ1Qbkg/SXgHICwzhIYVeHwV39OYAp4QFhWQNOk5V0OaSuCH9iqSbHYFZ9IIoNOhHGsW9b0JpK6S2unEujui097IPnyql5/gZl5lAZqX1oggfYS1VIQd2sPS3qQqf2dZASWyikCxT5l5UcsCmMjO7K7jqMDro/VbqC/Q+KME3hp4Ru/Hviu6kmKNBw=
-before_install:
-- if [ $TRAVIS_PULL_REQUEST = 'false' ]; then
-    openssl aes-256-cbc -K $encrypted_ac7eeb13566f_key -iv $encrypted_ac7eeb13566f_iv -in .travis-secring.gpg.enc -out .travis-secring.gpg -d;
-  fi
-after_success:
-- if [ $TRAVIS_PULL_REQUEST = 'false' -a x$TRAVIS_TAG != x ]; then
-    sbt -Dfile.encoding=UTF8 ";^^$SBT_CROSS_VERSION; releaseEarly";
-  fi
+    secure: mrnt7WLmgZ6C39fXjIABJXR91wRkibsxiFEJW9f1q+RIXIfvjRudTBlurEO/PDtWpRyE3JNIEFVn0G5TLmLc6u960d8TFh3ohf9ODO5JfWUgv7SskUKx6H1I3JVJR/rlARE0J7BgyyUhIkiMmNKJ56UclWjVcnttnBRLU//yR5uoD1iAj1wLqegcqRJZzwYWEeRMW3Ck7QCz1zyxddiu3dMgbuu+5TgClIpI9rPrIc4dVubBhMkgssQpT6uQtWca5R12AsBR9dj26GnGbrtW99dEC9rzd0Z60b4FC4vmDxUXEh3hYvHdzivEdGAL2d4/z+JOaGJI4inYdaz7i9Mpit537Ta+nwDqKMUs2KvkUjRMn9kLayCbP0YoPvVTeecYV9mtKtYSLW/nZ9ArxOB7sx9Lb6Z6OXUz453xopxyKgNEZ4/vBeMkiBl4EDetgjWabR6I9zvy/nKNcZSICz4YOb7pH285H8rm5AVZQfNDoRXkPmgbx1gMuYAB7BOHEVmnpQFsBAvhY4ZmFDivOzT4lKSB//x5gYOlJz7qOE6lNQUxZZLXNETarIE0yz9+ys28WJ/cV4wexhvCkOo4G9QINKeVZ7zkx6lyLTnVKTuj0d9REj2ullGiHB5k6jhgy98asrludRpa8DI+g5IcdSU1KM5x1zF7ir54WeMOp0LTr9U=
