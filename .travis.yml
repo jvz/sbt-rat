@@ -20,8 +20,9 @@ cache:
   - "$HOME/.sbt/boot/"
   - "$HOME/.m2/repository/"
 after_success:
-- if [ $TRAVIS_PULL_REQUEST = 'false' ]; then ./travis-release.sh $encrypted_ac7eeb13566f_key
-  $encrypted_ac7eeb13566f_iv; fi
+- if [[ $TRAVIS_PULL_REQUEST == 'false' && (! $TRAVIS_COMMIT_MESSAGE =~ "^Setting version to .*$") ]];
+    then ./travis-release.sh $encrypted_ac7eeb13566f_key $encrypted_ac7eeb13566f_iv;
+  fi
 env:
   global:
     secure: mrnt7WLmgZ6C39fXjIABJXR91wRkibsxiFEJW9f1q+RIXIfvjRudTBlurEO/PDtWpRyE3JNIEFVn0G5TLmLc6u960d8TFh3ohf9ODO5JfWUgv7SskUKx6H1I3JVJR/rlARE0J7BgyyUhIkiMmNKJ56UclWjVcnttnBRLU//yR5uoD1iAj1wLqegcqRJZzwYWEeRMW3Ck7QCz1zyxddiu3dMgbuu+5TgClIpI9rPrIc4dVubBhMkgssQpT6uQtWca5R12AsBR9dj26GnGbrtW99dEC9rzd0Z60b4FC4vmDxUXEh3hYvHdzivEdGAL2d4/z+JOaGJI4inYdaz7i9Mpit537Ta+nwDqKMUs2KvkUjRMn9kLayCbP0YoPvVTeecYV9mtKtYSLW/nZ9ArxOB7sx9Lb6Z6OXUz453xopxyKgNEZ4/vBeMkiBl4EDetgjWabR6I9zvy/nKNcZSICz4YOb7pH285H8rm5AVZQfNDoRXkPmgbx1gMuYAB7BOHEVmnpQFsBAvhY4ZmFDivOzT4lKSB//x5gYOlJz7qOE6lNQUxZZLXNETarIE0yz9+ys28WJ/cV4wexhvCkOo4G9QINKeVZ7zkx6lyLTnVKTuj0d9REj2ullGiHB5k6jhgy98asrludRpa8DI+g5IcdSU1KM5x1zF7ir54WeMOp0LTr9U=
