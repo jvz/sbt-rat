@@ -1,6 +1,8 @@
 language: scala
 jdk:
 - oraclejdk8
+install:
+- ./sbtx "^update"
 script:
 - ./sbtx "^scripted"
 sudo: false
