@@ -20,7 +20,7 @@ cache:
   - "$HOME/.sbt/boot/"
   - "$HOME/.m2/repository/"
 after_success:
-- if [[ $TRAVIS_PULL_REQUEST == 'false' && (! $TRAVIS_COMMIT_MESSAGE =~ "^Setting version to .*$") ]];
+- if [ $TRAVIS_PULL_REQUEST = 'false' ];
     then ./travis-release.sh $encrypted_ac7eeb13566f_key $encrypted_ac7eeb13566f_iv;
   fi
 env:
