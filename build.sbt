@@ -45,11 +45,11 @@ lazy val releaseSettings = Seq(
     checkSnapshotDependencies,
     inquireVersions,
     runClean,
-    releaseStepCommandAndRemaining("^ scripted"),
+    releaseStepCommandAndRemaining("^scripted"),
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
-    releaseStepCommandAndRemaining("^ publishSigned"),
+    releaseStepCommandAndRemaining("^publishSigned"),
     releaseStepCommand("sonatypeReleaseAll"),
     setNextVersion,
     commitNextVersion,
@@ -57,8 +57,15 @@ lazy val releaseSettings = Seq(
   )
 )
 
+lazy val packageSettings = for (task <- Seq(packageBin, packageSrc, packageDoc))
+  yield mappings in (Compile, task) ++= Seq(
+    (baseDirectory.value / "LICENSE", "META-INF/LICENSE"),
+    (baseDirectory.value / "NOTICE", "META-INF/NOTICE")
+  )
+
 lazy val root = (project in file("."))
   .settings(metadataSettings: _*)
   .settings(buildSettings: _*)
   .settings(signatureSettings: _*)
   .settings(releaseSettings: _*)
+  .settings(packageSettings: _*)

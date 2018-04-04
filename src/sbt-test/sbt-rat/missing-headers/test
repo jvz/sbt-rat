@@ -4,3 +4,5 @@
 -> auditCheck
 # and it should generate a rat report
 $ exists target/rat.txt
+# and it should generate an asciidoc version
+$ exists target/rat.adoc

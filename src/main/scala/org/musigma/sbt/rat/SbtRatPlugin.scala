@@ -74,7 +74,6 @@ object SbtRatPlugin extends AutoPlugin {
     def go(target: File, inputs: Seq[File], addDefaults: Boolean, families: Seq[LicenseFamily],
            headers: Seq[HeaderMatcher]): AuditReport = {
       if (!target.exists()) target.mkdirs()
-      val writer = new FileWriter(target / "rat.txt")
       val base = new IReportable {
         override def run(report: RatReport): Unit = {
           report.startReport()
@@ -87,7 +86,14 @@ object SbtRatPlugin extends AutoPlugin {
       config.setApproveDefaultLicenses(addDefaults)
       config.setApprovedLicenseNames(families.asJava)
       config.setHeaderMatcher(new HeaderMatcherMultiplexer(mergedHeaders.asJava))
-      Report.report(writer, base, RatDefaults.getDefaultStyleSheet, config)
+      val stylesheets = Seq(
+        "adoc" -> SbtRatPlugin.getClass.getResourceAsStream("/META-INF/asciidoc-rat.xsl"),
+        "txt" -> RatDefaults.getPlainStyleSheet
+      )
+      val results = for ((ext, stylesheet) <- stylesheets) yield {
+        Report.report(new FileWriter(target / s"rat.$ext"), base, stylesheet, config)
+      }
+      results.head
     }
 
     auditReport in cfg := go(

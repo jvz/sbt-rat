@@ -1,9 +1,15 @@
 = sbt-rat changelog
 
+== Version 0.5
+
+New Features::
+* Add sbt-release automated release pipeline.
+* Add AsciiDoc output file in addition to plain text.
+
 == Version 0.2
 
 New Features::
-* Add cross sbt builds for 0.13.17 and 1.1.2.
+* Add cross sbt builds for 0.13 and 1.0.
 
 == Version 0.1
 
