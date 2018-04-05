@@ -32,7 +32,7 @@ Generated at: <xsl:value-of select='rat-report/@timestamp'/>
 * Standards: <xsl:value-of select='count(descendant::type[attribute::name="standard"])'/>
 * Apache Licensed: <xsl:value-of select='count(descendant::header-type[attribute::name="AL   "])'/>
 * Generated Documents: <xsl:value-of select='count(descendant::header-type[attribute::name="GEN  "])'/>
-    * NOTE: JavaDocs are generated, thus a license header is optional. Generated files do not require license headers.
+    - _JavaDocs are generated, thus a license header is optional. Generated files do not require license headers._
 * Unknown Licenses: <xsl:value-of select='count(descendant::header-type[attribute::name="?????"])'/>
 
 <xsl:if test="descendant::resource[license-approval/@name='false']">
@@ -76,9 +76,7 @@ Notices, licenses etc. will be marked `N`.
         <xsl:when test='type/@name="archive"'>`A`</xsl:when>
         <xsl:when test='type/@name="binary"'>`B`</xsl:when>
         <xsl:when test='type/@name="standard"'>
-            <xsl:text>`</xsl:text>
             <xsl:value-of select='header-type/@name'/>
-            <xsl:text>`</xsl:text>
         </xsl:when>
         <xsl:otherwise>`!!!!!`</xsl:otherwise>
     </xsl:choose>
