@@ -15,7 +15,7 @@ To add this to your project, add the following to your build:
 addSbtPlugin("org.musigma" % "sbt-rat" % "0.5.1")
 ----
 
-This adds two tasks: `auditCheck` and `auditReport`.
+This adds two tasks: `ratCheck` and `ratReport`.
 The first task will fail the build if the audit check fails.
 The second task generates the audit report files (plain text and AsciiDoc).
 
