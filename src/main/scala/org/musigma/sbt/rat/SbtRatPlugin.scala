@@ -86,7 +86,13 @@ object SbtRatPlugin extends AutoPlugin {
       val customExclusionsFilter = customExclusions.foldLeft(NothingFilter: sbt.FileFilter) {
         case (filter: FileFilter, exclusion) => filter || new SimpleFileFilter(file => {
           val rel = baseDir.relativize(file)
-          rel.map { _.compareTo(exclusion) == 0 }.getOrElse(false)
+          rel.map { f =>
+            // excludes a file if either
+            // 1) the exclusion matches the exact path of the file
+            // 2) the exclusion does not contain a parent directory (i.e.
+            //    it's just a file name) and it matches the name of the file
+            f.compareTo(exclusion) == 0 || new java.io.File(f.getName).compareTo(exclusion) == 0
+          }.getOrElse(false)
         })
       }
 
@@ -182,6 +188,9 @@ object SbtRatPlugin extends AutoPlugin {
 
   override lazy val buildSettings: Seq[Setting[_]] = Nil
 
-  override lazy val globalSettings: Seq[Setting[_]] = Nil
+  override lazy val globalSettings: Seq[Setting[_]] = Seq(
+    aggregate in ratCheck := false,
+    aggregate in ratReport := false
+  )
 
 }
