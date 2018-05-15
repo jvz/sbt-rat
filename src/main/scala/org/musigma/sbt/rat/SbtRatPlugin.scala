@@ -55,6 +55,8 @@ object SbtRatPlugin extends AutoPlugin {
     val ratParseSCMIgnoresAsExcludes = settingKey[Boolean]("Whether to parse source code management system (SCM) ignore files and use their contents as excludes.")
 
     val ratReportStyle = settingKey[String]("Which style of rat report to generate, either 'txt', or 'adoc'")
+
+    val ratTarget = settingKey[File]("Output file to save the rat report to")
   }
 
   import autoImport._
@@ -67,7 +69,8 @@ object SbtRatPlugin extends AutoPlugin {
     ratLicenses := Nil,
     ratExcludes := Nil,
     ratParseSCMIgnoresAsExcludes := true,
-    ratReportStyle := "txt"
+    ratReportStyle := "txt",
+    ratTarget := target.value / ("rat." + ratReportStyle.value)
   )
 
   def makeRatReportSetting(): Setting[Task[AuditReport]] = {
@@ -123,7 +126,8 @@ object SbtRatPlugin extends AutoPlugin {
       excludes: Seq[File],  parseSCMIgnores: Boolean,
       ratReportStyle: String): AuditReport = {
 
-      if (!target.exists()) target.mkdirs()
+      val targetDir = target.getAbsoluteFile.getParentFile
+      if (!targetDir.exists()) targetDir.mkdirs()
 
       val exclusionsFilter = getExclusionsFilter(baseDir, excludes, parseSCMIgnores)
       val inputs: Seq[File] =
@@ -154,13 +158,13 @@ object SbtRatPlugin extends AutoPlugin {
         case _ => RatDefaults.getPlainStyleSheet
       }
 
-      val writer = new java.io.FileWriter(target / s"rat.$ratReportStyle")
+      val writer = new java.io.FileWriter(target)
       val results = Report.report(writer, base, stylesheet, config)
       results
     }
 
     ratReport := go(
-      target.value,
+      ratTarget.value,
       baseDirectory.value,
       ratAddDefaultLicenseMatchers.value,
       ratLicenseFamilies.value,
@@ -171,18 +175,19 @@ object SbtRatPlugin extends AutoPlugin {
     )
   }
 
-  class UnapprovedLicenseException(found: Int)
-    extends RuntimeException(s"Unapproved licenses found: $found. See full report in rat.txt")
+  class UnapprovedLicenseException(found: Int, target: File)
+    extends RuntimeException(s"Unapproved licenses found: $found. See full report in $target")
 
   def makeRatCheckSetting(): Setting[Task[Unit]] = {
-    def go(report: AuditReport): Unit = {
+    def go(report: AuditReport, target: File): Unit = {
       if (report.getNumUnApproved > 0) {
-        throw new UnapprovedLicenseException(report.getNumUnApproved)
+        throw new UnapprovedLicenseException(report.getNumUnApproved, target)
       }
     }
 
     ratCheck := go(
-      (ratReport).value
+      ratReport.value,
+      ratTarget.value
     )
   }
 
