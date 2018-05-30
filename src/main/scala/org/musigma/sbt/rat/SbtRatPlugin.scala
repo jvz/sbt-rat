@@ -175,19 +175,23 @@ object SbtRatPlugin extends AutoPlugin {
     )
   }
 
-  class UnapprovedLicenseException(found: Int, target: File)
-    extends RuntimeException(s"Unapproved licenses found: $found. See full report in $target")
+  class UnapprovedLicenseException()
+    extends RuntimeException("Unapproved licenses")
+    with FeedbackProvidedException
 
   def makeRatCheckSetting(): Setting[Task[Unit]] = {
-    def go(report: RatReport, target: File): Unit = {
-      if (report.getNumUnApproved > 0) {
-        throw new UnapprovedLicenseException(report.getNumUnApproved, target)
+    def go(report: RatReport, target: File, log: Logger): Unit = {
+      val numUnApproved = report.getNumUnApproved
+      if (numUnApproved > 0) {
+        log.error(s"Unapproved licenses found: $numUnApproved. See full report in $target")
+        throw new UnapprovedLicenseException
       }
     }
 
     ratCheck := go(
       ratReport.value,
-      ratTarget.value
+      ratTarget.value,
+      streams.value.log
     )
   }
 
