@@ -22,7 +22,7 @@ import org.apache.rat.document.impl.FileDocument
 import org.apache.rat.license.ILicenseFamily
 import org.apache.rat.license.SimpleLicenseFamily
 import org.apache.rat.mp.util.ScmIgnoreParser
-import org.apache.rat.report.claim.ClaimStatistic
+import org.apache.rat.report.claim.{ ClaimStatistic => RatReport }
 import org.apache.rat.report.{ IReportable, RatReport => ApacheRatReport }
 import org.apache.rat.{ Report, ReportConfiguration, Defaults => RatDefaults }
 
@@ -41,7 +41,6 @@ object SbtRatPlugin extends AutoPlugin {
   object autoImport {
     val ratCheck = taskKey[Unit]("Performs a release audit check")
 
-    type RatReport = ClaimStatistic
     val ratReport = taskKey[RatReport]("Generates a release audit report")
 
     val ratAddDefaultLicenseMatchers = settingKey[Boolean]("Whether to add the default list of license matchers.")
@@ -62,8 +61,21 @@ object SbtRatPlugin extends AutoPlugin {
   import autoImport._
 
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
-    makeRatCheckSetting(),
-    makeRatReportSetting(),
+    ratCheck := SbtRatCheck(
+      ratReport.value,
+      ratTarget.value,
+      streams.value.log
+    ),
+    ratReport := SbtRatReport(
+      ratTarget.value,
+      baseDirectory.value,
+      ratAddDefaultLicenseMatchers.value,
+      ratLicenseFamilies.value,
+      ratLicenses.value,
+      ratExcludes.value,
+      ratParseSCMIgnoresAsExcludes.value,
+      ratReportStyle.value
+    ),
     ratAddDefaultLicenseMatchers := true,
     ratLicenseFamilies := Nil,
     ratLicenses := Nil,
@@ -73,133 +85,117 @@ object SbtRatPlugin extends AutoPlugin {
     ratTarget := target.value / ("rat." + ratReportStyle.value)
   )
 
-  def makeRatReportSetting(): Setting[Task[RatReport]] = {
-
-    def getExclusionsFilter(baseDir: File, customExclusions: Seq[File], parseSCMIgnores: Boolean) = {
-      val scmExclusionsFilter =
-        if (parseSCMIgnores) {
-          val scmExclusions = ScmIgnoreParser.getExclusionsFromSCM(baseDir).asScala
-          scmExclusions.foldLeft(NothingFilter: sbt.FileFilter) {
-            case (filter: FileFilter, exclusion) => filter || new ExactFilter(exclusion)
-          }
-        } else {
-          NothingFilter
-        }
-
-      val customExclusionsFilter = customExclusions.foldLeft(NothingFilter: sbt.FileFilter) {
-        case (filter: FileFilter, exclusion) => filter || new SimpleFileFilter(file => {
-          val rel = baseDir.relativize(file)
-          rel.map { f =>
-            // excludes a file if either
-            // 1) the exclusion matches the exact path of the file
-            // 2) the exclusion does not contain a parent directory (i.e.
-            //    it's just a file name) and it matches the name of the file
-            f.compareTo(exclusion) == 0 || new java.io.File(f.getName).compareTo(exclusion) == 0
-          }.getOrElse(false)
-        })
-      }
-
-      scmExclusionsFilter || customExclusionsFilter
-    }
-
-    def makeHeaderMatcher(licenses: Seq[(String, String, String)], addDefaultMatchers: Boolean): IHeaderMatcher = {
-      val customHeaders = licenses.map { case (category, family, text) =>
-        val license = new FullTextMatchingLicense()
-        license.setLicenseFamilyCategory(category)
-        license.setLicenseFamilyName(family)
-        license.setFullText(text)
-        license
-      }
-
-      val defaultHeaders = if (addDefaultMatchers) RatDefaults.DEFAULT_MATCHERS.asScala else Nil
-
-      val headerMatcher = new HeaderMatcherMultiplexer((customHeaders ++ defaultHeaders).asJava)
-      headerMatcher
-    }
-
-    def makeLicenseFamilies(families: Seq[String]): Seq[ILicenseFamily] = {
-      families.map { new SimpleLicenseFamily(_) }
-    }
-
-    def go(target: File, baseDir: File,
-      addDefaultMatchers: Boolean, families: Seq[String], licenses: Seq[(String, String, String)],
-      excludes: Seq[File],  parseSCMIgnores: Boolean,
-      ratReportStyle: String): RatReport = {
-
-      val targetDir = target.getAbsoluteFile.getParentFile
-      if (!targetDir.exists()) targetDir.mkdirs()
-
-      val exclusionsFilter = getExclusionsFilter(baseDir, excludes, parseSCMIgnores)
-      val inputs: Seq[File] =
-        PathFinder(baseDir).descendantsExcept(AllPassFilter, exclusionsFilter)
-          .get
-          .filter { _.isFile }
-          .map { baseDir.relativize(_).get }
-
-      val base = new IReportable {
-        override def run(report: ApacheRatReport): Unit = {
-          report.startReport()
-          inputs.map(new FileDocument(_)).foreach(report.report)
-          report.endReport()
-        }
-      }
-
-      val headerMatcher = makeHeaderMatcher(licenses, addDefaultMatchers)
-      val licenseFamilies = makeLicenseFamilies(families).asJava
-
-      val config = new ReportConfiguration
-      config.setApproveDefaultLicenses(addDefaultMatchers)
-      config.setApprovedLicenseNames(licenseFamilies)
-      config.setHeaderMatcher(headerMatcher)
-
-      val stylesheet = ratReportStyle match {
-        case "adoc" => SbtRatPlugin.getClass.getResourceAsStream("/META-INF/asciidoc-rat.xsl")
-        case "txt" => RatDefaults.getPlainStyleSheet
-        case _ => RatDefaults.getPlainStyleSheet
-      }
-
-      val writer = new java.io.FileWriter(target)
-      val results = Report.report(writer, base, stylesheet, config)
-      results
-    }
-
-    ratReport := go(
-      ratTarget.value,
-      baseDirectory.value,
-      ratAddDefaultLicenseMatchers.value,
-      ratLicenseFamilies.value,
-      ratLicenses.value,
-      ratExcludes.value,
-      ratParseSCMIgnoresAsExcludes.value,
-      ratReportStyle.value
-    )
-  }
-
-  class UnapprovedLicenseException()
-    extends RuntimeException("Unapproved licenses")
-    with FeedbackProvidedException
-
-  def makeRatCheckSetting(): Setting[Task[Unit]] = {
-    def go(report: RatReport, target: File, log: Logger): Unit = {
-      val numUnApproved = report.getNumUnApproved
-      if (numUnApproved > 0) {
-        log.error(s"Unapproved licenses found: $numUnApproved. See full report in $target")
-        throw new UnapprovedLicenseException
-      }
-    }
-
-    ratCheck := go(
-      ratReport.value,
-      ratTarget.value,
-      streams.value.log
-    )
-  }
-
   override lazy val buildSettings: Seq[Setting[_]] = Nil
 
   override lazy val globalSettings: Seq[Setting[_]] = Seq(
     aggregate in ratCheck := false,
     aggregate in ratReport := false
   )
+}
 
+object SbtRatReport {
+
+  def getExclusionsFilter(baseDir: File, customExclusions: Seq[File], parseSCMIgnores: Boolean) = {
+    val scmExclusionsFilter =
+      if (parseSCMIgnores) {
+        val scmExclusions = ScmIgnoreParser.getExclusionsFromSCM(baseDir).asScala
+        scmExclusions.foldLeft(NothingFilter: sbt.FileFilter) {
+          case (filter: FileFilter, exclusion) => filter || new ExactFilter(exclusion)
+        }
+      } else {
+        NothingFilter
+      }
+
+    val customExclusionsFilter = customExclusions.foldLeft(NothingFilter: sbt.FileFilter) {
+      case (filter: FileFilter, exclusion) => filter || new SimpleFileFilter(file => {
+        val rel = baseDir.relativize(file)
+        rel.map { f =>
+          // excludes a file if either
+          // 1) the exclusion matches the exact path of the file
+          // 2) the exclusion does not contain a parent directory (i.e.
+          //    it's just a file name) and it matches the name of the file
+          f.compareTo(exclusion) == 0 || new java.io.File(f.getName).compareTo(exclusion) == 0
+        }.getOrElse(false)
+      })
+    }
+
+    scmExclusionsFilter || customExclusionsFilter
+  }
+
+  def makeHeaderMatcher(licenses: Seq[(String, String, String)], addDefaultMatchers: Boolean): IHeaderMatcher = {
+    val customHeaders = licenses.map { case (category, family, text) =>
+      val license = new FullTextMatchingLicense()
+      license.setLicenseFamilyCategory(category)
+      license.setLicenseFamilyName(family)
+      license.setFullText(text)
+      license
+    }
+
+    val defaultHeaders = if (addDefaultMatchers) RatDefaults.DEFAULT_MATCHERS.asScala else Nil
+
+    val headerMatcher = new HeaderMatcherMultiplexer((customHeaders ++ defaultHeaders).asJava)
+    headerMatcher
+  }
+
+  def makeLicenseFamilies(families: Seq[String]): Seq[ILicenseFamily] = {
+    families.map { new SimpleLicenseFamily(_) }
+  }
+
+  def apply(target: File, baseDir: File,
+    addDefaultMatchers: Boolean, families: Seq[String], licenses: Seq[(String, String, String)],
+    excludes: Seq[File],  parseSCMIgnores: Boolean,
+    ratReportStyle: String): RatReport = {
+
+    val targetDir = target.getAbsoluteFile.getParentFile
+    if (!targetDir.exists()) targetDir.mkdirs()
+
+    val exclusionsFilter = getExclusionsFilter(baseDir, excludes, parseSCMIgnores)
+    val inputs: Seq[File] =
+      PathFinder(baseDir).descendantsExcept(AllPassFilter, exclusionsFilter)
+        .get
+        .filter { _.isFile }
+        .map { baseDir.relativize(_).get }
+
+    val base = new IReportable {
+      override def run(report: ApacheRatReport): Unit = {
+        report.startReport()
+        inputs.map(new FileDocument(_)).foreach(report.report)
+        report.endReport()
+      }
+    }
+
+    val headerMatcher = makeHeaderMatcher(licenses, addDefaultMatchers)
+    val licenseFamilies = makeLicenseFamilies(families).asJava
+
+    val config = new ReportConfiguration
+    config.setApproveDefaultLicenses(addDefaultMatchers)
+    config.setApprovedLicenseNames(licenseFamilies)
+    config.setHeaderMatcher(headerMatcher)
+
+    val stylesheet = ratReportStyle match {
+      case "adoc" => SbtRatPlugin.getClass.getResourceAsStream("/META-INF/asciidoc-rat.xsl")
+      case "txt" => RatDefaults.getPlainStyleSheet
+      case _ => RatDefaults.getPlainStyleSheet
+    }
+
+    val writer = new java.io.FileWriter(target)
+    val results = Report.report(writer, base, stylesheet, config)
+    results
+  }
+
+}
+
+object SbtRatCheck {
+
+  class UnapprovedLicenseException()
+    extends RuntimeException("Unapproved licenses")
+    with FeedbackProvidedException
+
+  def apply(report: RatReport, target: File, log: Logger): Unit = {
+    val numUnApproved = report.getNumUnApproved
+    if (numUnApproved > 0) {
+      log.error(s"Unapproved licenses found: $numUnApproved. See full report in $target")
+      throw new UnapprovedLicenseException
+    }
+  }
 }
