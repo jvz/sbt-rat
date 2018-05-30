@@ -72,9 +72,9 @@ object SbtRatPlugin extends AutoPlugin {
       ratAddDefaultLicenseMatchers.value,
       ratLicenseFamilies.value,
       ratLicenses.value,
-      ratExcludes.value,
-      ratParseSCMIgnoresAsExcludes.value,
-      ratReportStyle.value
+      ratReportStyle.value,
+      (includeFilter in ratReport).value,
+      (excludeFilter in ratReport).value
     ),
     ratAddDefaultLicenseMatchers := true,
     ratLicenseFamilies := Nil,
@@ -82,7 +82,13 @@ object SbtRatPlugin extends AutoPlugin {
     ratExcludes := Nil,
     ratParseSCMIgnoresAsExcludes := true,
     ratReportStyle := "txt",
-    ratTarget := target.value / ("rat." + ratReportStyle.value)
+    ratTarget := target.value / ("rat." + ratReportStyle.value),
+    includeFilter in ratReport := AllPassFilter,
+    excludeFilter in ratReport := SbtRatExcludeFilter(
+      baseDirectory.value,
+      ratExcludes.value,
+      ratParseSCMIgnoresAsExcludes.value
+    )
   )
 
   override lazy val buildSettings: Seq[Setting[_]] = Nil
@@ -93,9 +99,9 @@ object SbtRatPlugin extends AutoPlugin {
   )
 }
 
-object SbtRatReport {
+object SbtRatExcludeFilter {
 
-  def getExclusionsFilter(baseDir: File, customExclusions: Seq[File], parseSCMIgnores: Boolean) = {
+  def apply(baseDir: File, customExclusions: Seq[File], parseSCMIgnores: Boolean) = {
     val scmExclusionsFilter =
       if (parseSCMIgnores) {
         val scmExclusions = ScmIgnoreParser.getExclusionsFromSCM(baseDir).asScala
@@ -121,6 +127,9 @@ object SbtRatReport {
 
     scmExclusionsFilter || customExclusionsFilter
   }
+}
+
+object SbtRatReport {
 
   def makeHeaderMatcher(licenses: Seq[(String, String, String)], addDefaultMatchers: Boolean): IHeaderMatcher = {
     val customHeaders = licenses.map { case (category, family, text) =>
@@ -143,15 +152,15 @@ object SbtRatReport {
 
   def apply(target: File, baseDir: File,
     addDefaultMatchers: Boolean, families: Seq[String], licenses: Seq[(String, String, String)],
-    excludes: Seq[File],  parseSCMIgnores: Boolean,
-    ratReportStyle: String): RatReport = {
+    ratReportStyle: String,
+    includeFilter: FileFilter,
+    excludeFilter: FileFilter): RatReport = {
 
     val targetDir = target.getAbsoluteFile.getParentFile
     if (!targetDir.exists()) targetDir.mkdirs()
 
-    val exclusionsFilter = getExclusionsFilter(baseDir, excludes, parseSCMIgnores)
     val inputs: Seq[File] =
-      PathFinder(baseDir).descendantsExcept(AllPassFilter, exclusionsFilter)
+      PathFinder(baseDir).descendantsExcept(includeFilter, excludeFilter)
         .get
         .filter { _.isFile }
         .map { baseDir.relativize(_).get }

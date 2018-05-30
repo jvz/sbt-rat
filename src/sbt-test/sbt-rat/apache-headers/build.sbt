@@ -21,9 +21,10 @@ version := "0.1"
 scalaVersion := "2.12.4"
 
 ratExcludes := Seq(
-  file(".gitignore"),
   file("project/build.properties")
 )
+
+excludeFilter in ratReport := (excludeFilter in ratReport).value || ".gitignore"
 
 ratLicenses := Seq(
   ("BSD3 ", BSD3_LICENSE_NAME, BSD3_LICENSE_TEXT)
