@@ -23,7 +23,7 @@ import org.apache.rat.license.ILicenseFamily
 import org.apache.rat.license.SimpleLicenseFamily
 import org.apache.rat.mp.util.ScmIgnoreParser
 import org.apache.rat.report.claim.ClaimStatistic
-import org.apache.rat.report.{ IReportable, RatReport }
+import org.apache.rat.report.{ IReportable, RatReport => ApacheRatReport }
 import org.apache.rat.{ Report, ReportConfiguration, Defaults => RatDefaults }
 
 import sbt.Keys._
@@ -41,8 +41,8 @@ object SbtRatPlugin extends AutoPlugin {
   object autoImport {
     val ratCheck = taskKey[Unit]("Performs a release audit check")
 
-    type AuditReport = ClaimStatistic
-    val ratReport = taskKey[AuditReport]("Generates a release audit report")
+    type RatReport = ClaimStatistic
+    val ratReport = taskKey[RatReport]("Generates a release audit report")
 
     val ratAddDefaultLicenseMatchers = settingKey[Boolean]("Whether to add the default list of license matchers.")
 
@@ -73,7 +73,7 @@ object SbtRatPlugin extends AutoPlugin {
     ratTarget := target.value / ("rat." + ratReportStyle.value)
   )
 
-  def makeRatReportSetting(): Setting[Task[AuditReport]] = {
+  def makeRatReportSetting(): Setting[Task[RatReport]] = {
 
     def getExclusionsFilter(baseDir: File, customExclusions: Seq[File], parseSCMIgnores: Boolean) = {
       val scmExclusionsFilter =
@@ -124,7 +124,7 @@ object SbtRatPlugin extends AutoPlugin {
     def go(target: File, baseDir: File,
       addDefaultMatchers: Boolean, families: Seq[String], licenses: Seq[(String, String, String)],
       excludes: Seq[File],  parseSCMIgnores: Boolean,
-      ratReportStyle: String): AuditReport = {
+      ratReportStyle: String): RatReport = {
 
       val targetDir = target.getAbsoluteFile.getParentFile
       if (!targetDir.exists()) targetDir.mkdirs()
@@ -137,7 +137,7 @@ object SbtRatPlugin extends AutoPlugin {
           .map { baseDir.relativize(_).get }
 
       val base = new IReportable {
-        override def run(report: RatReport): Unit = {
+        override def run(report: ApacheRatReport): Unit = {
           report.startReport()
           inputs.map(new FileDocument(_)).foreach(report.report)
           report.endReport()
@@ -179,7 +179,7 @@ object SbtRatPlugin extends AutoPlugin {
     extends RuntimeException(s"Unapproved licenses found: $found. See full report in $target")
 
   def makeRatCheckSetting(): Setting[Task[Unit]] = {
-    def go(report: AuditReport, target: File): Unit = {
+    def go(report: RatReport, target: File): Unit = {
       if (report.getNumUnApproved > 0) {
         throw new UnapprovedLicenseException(report.getNumUnApproved, target)
       }
