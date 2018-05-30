@@ -1,8 +1,6 @@
 # given source files with missing headers
 # when we audit check
 # then it should fail
--> auditCheck
-# and it should generate a rat report
-$ exists target/rat.txt
+-> ratCheck
 # and it should generate an asciidoc version
 $ exists target/rat.adoc
