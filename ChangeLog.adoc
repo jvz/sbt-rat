@@ -1,5 +1,11 @@
 = sbt-rat changelog
 
+== Version 0.6.1
+
+Changes::
+* Update to Apache Rat 0.13.
+* Update changelog for prior release.
+
 == Version 0.6.0
 
 Changes::
