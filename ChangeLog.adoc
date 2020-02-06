@@ -1,5 +1,23 @@
 = sbt-rat changelog
 
+== Version 0.6.0
+
+Changes::
+* Change task names from `auditCheck` to `ratCheck` and `auditReport` to
+  `ratReport` to avoid namespace conflicts with other sbt plugins.
+* Change setting names to all use `rat` as a prefix.
+* Change names overall to better match the naming scheme used in the maven
+  plugin.
+* Remove `maxErrors` setting for consistency with the maven plugin.
+
+New Features::
+* Add `ratExcludes` and `ratParseSCMIgnoresAsExcludes` settings for better
+  granularity on rat checks which replaces the previous behavior of only
+  checking unmanaged source files.
+* Add `includeFilter` and `excludeFilter` settings for `ratReport` task.
+* Add `ratReportStyle` setting to choose output style which replaces the
+  previous behavior of outputing all supported formats.
+
 == Version 0.5.1
 
 Bug Fixes::
