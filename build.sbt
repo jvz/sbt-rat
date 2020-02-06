@@ -16,7 +16,7 @@ lazy val metadataSettings = Seq(
 lazy val buildSettings = Seq(
   sbtPlugin := true,
   crossSbtVersions := Seq("0.13.17", "1.1.2"),
-  libraryDependencies += "org.apache.rat" % "apache-rat-core" % "0.12",
+  libraryDependencies += "org.apache.rat" % "apache-rat-core" % "0.13",
   scriptedLaunchOpts ++= Seq("-Xmx1024M", "-Dplugin.version=" + version.value),
   initialCommands in console := "import org.musigma.sbt.rat._"
 )

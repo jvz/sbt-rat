@@ -12,7 +12,7 @@ To add this to your project, add the following to your build:
 .project/plugins.sbt
 [source,scala]
 ----
-addSbtPlugin("org.musigma" % "sbt-rat" % "0.6.0")
+addSbtPlugin("org.musigma" % "sbt-rat" % "0.6.1")
 ----
 
 This adds two tasks: `ratCheck` and `ratReport`.
