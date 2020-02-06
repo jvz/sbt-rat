@@ -1,6 +1,7 @@
 language: scala
+dist: xenial
 jdk:
-- oraclejdk8
+- openjdk8
 install:
 - ./sbtx "^update"
 script:
@@ -8,9 +9,6 @@ script:
 sudo: false
 addons:
   ssh_known_hosts: github.com
-  apt:
-    packages:
-    - oracle-java8-installer
 before_cache:
 - find $HOME/.sbt -name "*.lock" | xargs rm
 - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
