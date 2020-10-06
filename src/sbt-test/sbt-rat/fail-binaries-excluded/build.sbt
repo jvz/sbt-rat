@@ -22,7 +22,8 @@ scalaVersion := "2.12.4"
 
 ratExcludes := Seq(
   file(".gitignore"),
-  file("project/build.properties")
+  file("project/build.properties"),
+  file("src/main/resources/approved.bin")
 )
 
-ratReportStyle := "adoc"
+ratFailBinaries := true

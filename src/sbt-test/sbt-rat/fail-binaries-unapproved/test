@@ -15,9 +15,7 @@
 ## specific language governing permissions and limitations
 ## under the License.
 ## 
-# given source files with missing headers
-# when we audit check
-# then it should fail
+# Binary files exist with ratFailBinaries := true, causing ratCheck to fail
 -> ratCheck
-# and it should generate an asciidoc version
-$ exists target/rat.adoc
+# and it should generate a rat.txt report
+$ exists target/rat.txt
