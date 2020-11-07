@@ -22,12 +22,7 @@ lazy val buildSettings = Seq(
 )
 
 lazy val signatureSettings = Seq(
-  pgpSecretRing := {
-    val old = pgpSecretRing.value
-    val travis = file("travis/secring.gpg")
-    if (travis.exists()) travis else old
-  },
-  usePgpKeyHex("BCC60587F2C9062CE016"),
+  usePgpKeyHex("08CF5E81AFBAB81E"),
   pgpPassphrase := sys.env.get("PGP_PASS").map(_.toCharArray)
 )
 
