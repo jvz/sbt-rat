@@ -7,15 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: git config user.name "Matt Sicker"
-      - run: git config user.email "mattsicker@apache.org"
       - uses: actions/setup-java@v1
         with:
           java-version: 1.8
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: ${{ secrets.GPG_PASSWORD }}
       - name: Release
-        run: ./sbtx "release with-defaults"
+        run: |
+          git config user.name "Matt Sicker"
+          git config user.email "mattsicker@apache.org"
+          export GPG_TTY=$(tty)
+          ./sbtx "release with-defaults"
         env:
           SONATYPE_USER: ${{ secrets.MAVEN_USERNAME }}
           SONATYPE_PASS: ${{ secrets.MAVEN_PASSWORD }}
