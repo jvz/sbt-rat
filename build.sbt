@@ -22,7 +22,7 @@ lazy val buildSettings = Seq(
 )
 
 lazy val signatureSettings = Seq(
-  usePgpKeyHex("08CF5E81AFBAB81E")
+  usePgpKeyHex("CF71A1CAFE39DE54EE88333708CF5E81AFBAB81E")
 )
 
 lazy val releaseSettings = Seq(
