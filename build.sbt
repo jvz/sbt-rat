@@ -7,7 +7,8 @@ lazy val metadataSettings = Seq(
   moduleName := "sbt-rat",
   licenses := Seq("Apache License, Version 2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   developers := List(
-    Developer("jvz", "Matt Sicker", "mattsicker@apache.org", url("https://musigma.blog/"))
+    Developer("jvz", "Matt Sicker", "mattsicker@apache.org", url("https://musigma.blog/")),
+    Developer("stevedlawrence", "Steve Lawrence", "", url("https://github.com/stevedlawrence"))
   ),
   scmInfo := Some(ScmInfo(url("https://github.com/jvz/sbt-rat"), "scm:git:git@github.com:jvz/sbt-rat.git")),
   homepage := Some(url("https://github.com/jvz/sbt-rat"))
@@ -22,13 +23,11 @@ lazy val buildSettings = Seq(
 )
 
 lazy val signatureSettings = Seq(
-  pgpSecretRing := {
-    val old = pgpSecretRing.value
-    val travis = file("travis/secring.gpg")
-    if (travis.exists()) travis else old
-  },
-  usePgpKeyHex("BCC60587F2C9062CE016"),
-  pgpPassphrase := sys.env.get("PGP_PASS").map(_.toCharArray)
+  usePgpKeyHex("CF71A1CAFE39DE54EE88333708CF5E81AFBAB81E"),
+  useGpgPinentry := false,
+  useGpgAgent := false,
+// override gpg command to as workaround for https://github.com/sbt/sbt-pgp/issues/173
+  PgpKeys.gpgCommand in Global := (baseDirectory.value / "gpg-no-tty").getAbsolutePath
 )
 
 lazy val releaseSettings = Seq(

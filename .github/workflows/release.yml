@@ -1,0 +1,22 @@
+on:
+  push:
+    branches:
+      - master
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+      - name: Release
+        run: |
+          git config user.name "Matt Sicker"
+          git config user.email "mattsicker@apache.org"
+          ./sbtx "release with-defaults"
+        env:
+          SONATYPE_USER: ${{ secrets.MAVEN_USERNAME }}
+          SONATYPE_PASS: ${{ secrets.MAVEN_PASSWORD }}
+          PGP_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}

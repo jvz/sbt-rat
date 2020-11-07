@@ -8,6 +8,7 @@ Bug Fixes::
 Changes::
 * Update to Apache Rat 0.13.
 * Update changelog for prior release.
+* Migrate to GitHub Actions for publishing releases (#14).
 
 == Version 0.6.0
 
