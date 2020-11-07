@@ -18,4 +18,4 @@ jobs:
         env:
           SONATYPE_USER: ${{ secrets.MAVEN_USERNAME }}
           SONATYPE_PASS: ${{ secrets.MAVEN_PASSWORD }}
-          PGP_PASS: ${{ secrets.GPG_PASSWORD }}
+          PGP_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}
