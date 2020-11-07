@@ -23,7 +23,9 @@ lazy val buildSettings = Seq(
 
 lazy val signatureSettings = Seq(
   usePgpKeyHex("CF71A1CAFE39DE54EE88333708CF5E81AFBAB81E"),
-  useGpgAgent := sys.env.contains("GPG_TTY")
+  pgpPassphrase := sys.env.get("PGP_PASSPHRASE").map(_.toCharArray),
+  // override gpg command to as workaround for https://github.com/sbt/sbt-pgp/issues/173
+  gpgCommand := (baseDirectory.value / "gpg-no-tty").getAbsolutePath
 )
 
 lazy val releaseSettings = Seq(
