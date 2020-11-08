@@ -8,7 +8,7 @@ lazy val metadataSettings = Seq(
   licenses := Seq("Apache License, Version 2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   developers := List(
     Developer("jvz", "Matt Sicker", "mattsicker@apache.org", url("https://musigma.blog/")),
-    Developer("stevedlawrence", "Steve Lawrence", "", url("https://github.com/stevedlawrence"))
+    Developer("stevedlawrence", "Steve Lawrence", "slawrence@apache.org", url("https://github.com/stevedlawrence"))
   ),
   scmInfo := Some(ScmInfo(url("https://github.com/jvz/sbt-rat"), "scm:git:git@github.com:jvz/sbt-rat.git")),
   homepage := Some(url("https://github.com/jvz/sbt-rat"))

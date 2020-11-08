@@ -56,6 +56,8 @@ object SbtRatPlugin extends AutoPlugin {
     val ratReportStyle = settingKey[String]("Which style of rat report to generate, either 'txt', or 'adoc'")
 
     val ratTarget = settingKey[File]("Output file to save the rat report to")
+
+    val ratFailBinaries = settingKey[Boolean]("If true, causes ratCheck to fail if binaries are found")
   }
 
   import autoImport._
@@ -64,6 +66,7 @@ object SbtRatPlugin extends AutoPlugin {
     ratCheck := SbtRatCheck(
       ratReport.value,
       ratTarget.value,
+      ratFailBinaries.value,
       streams.value.log
     ),
     ratReport := SbtRatReport(
@@ -83,6 +86,7 @@ object SbtRatPlugin extends AutoPlugin {
     ratParseSCMIgnoresAsExcludes := true,
     ratReportStyle := "txt",
     ratTarget := target.value / ("rat." + ratReportStyle.value),
+    ratFailBinaries := false,
     includeFilter in ratReport := AllPassFilter,
     excludeFilter in ratReport := SbtRatExcludeFilter(
       baseDirectory.value,
@@ -200,10 +204,24 @@ object SbtRatCheck {
     extends RuntimeException("Unapproved licenses")
     with FeedbackProvidedException
 
-  def apply(report: RatReport, target: File, log: Logger): Unit = {
+  def apply(report: RatReport, target: File, failBinaries: Boolean, log: Logger): Unit = {
+
     val numUnApproved = report.getNumUnApproved
     if (numUnApproved > 0) {
       log.error(s"Unapproved licenses found: $numUnApproved. See full report in $target")
+    }
+
+    val numUnApprovedBinaries =
+      if (failBinaries) {
+        report.getDocumentCategoryMap.asScala.get("binary").map(_.intValue).getOrElse(0)
+      } else {
+        0
+      }
+    if (numUnApprovedBinaries > 0) {
+      log.error(s"Unapproved binaries found: $numUnApprovedBinaries. See full report in $target")
+    }
+
+    if (numUnApproved + numUnApprovedBinaries > 0) {
       throw new UnapprovedLicenseException
     }
   }

@@ -1,5 +1,11 @@
 = sbt-rat changelog
 
+== Version 0.7.0
+
+New Features::
+* Add `ratFailBinaries` setting to `ratCheck` to validate no binaries
+  are found.
+
 == Version 0.6.1
 
 Bug Fixes::

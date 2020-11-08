@@ -25,4 +25,4 @@ ratExcludes := Seq(
   file("project/build.properties")
 )
 
-ratReportStyle := "adoc"
+ratFailBinaries := false

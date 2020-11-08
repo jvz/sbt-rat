@@ -2,7 +2,7 @@
 
 Release audit tool for sbt. See link:ChangeLog.adoc[changelog].
 
-image:https://travis-ci.org/jvz/sbt-rat.svg?branch=master["Build Status", link="https://travis-ci.org/jvz/sbt-rat"]
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/jvz/sbt-rat)
 
 == Usage
 
@@ -12,7 +12,7 @@ To add this to your project, add the following to your build:
 .project/plugins.sbt
 [source,scala]
 ----
-addSbtPlugin("org.musigma" % "sbt-rat" % "0.6.1")
+addSbtPlugin("org.musigma" % "sbt-rat" % "0.7.0")
 ----
 
 This adds two tasks: `ratCheck` and `ratReport`.
